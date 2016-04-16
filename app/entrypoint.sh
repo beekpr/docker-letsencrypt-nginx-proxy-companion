@@ -23,6 +23,15 @@ EOT
     fi
 }
 
+function get_nginx_proxy_gen_cid {
+    local pattern=$NGINX_GEN_CONTAINER_NAME_PATTERN
+    if [[ -z "$pattern" ]]; then
+        pattern="nginx-gen"
+    fi
+    local container_id=$(docker_api '/containers/json' | jq -r 'map(select(.Names[] | contains('"\"$pattern\""'))) | .[] .Id')
+    export NGINX_DOCKER_GEN_CONTAINER=$container_id
+}
+
 function get_nginx_proxy_cid {
     # Look for a NGINX_VERSION environment variable in containers that we have mount volumes from.
     local volumes_from=$(docker_api "/containers/$CONTAINER_ID/json" | jq -r '.HostConfig.VolumesFrom[]' 2>/dev/null)
@@ -70,6 +79,9 @@ source /app/functions.lib
 
 if [[ "$*" == "/bin/bash /app/start.sh" ]]; then
     check_docker_socket
+    if [[ -z "${NGINX_DOCKER_GEN_CONTAINER}" ]]; then
+        get_nginx_proxy_gen_cid
+    fi
     if [[ -z "${NGINX_DOCKER_GEN_CONTAINER:-}" ]]; then
         [[ -z "${NGINX_PROXY_CONTAINER:-}" ]] && get_nginx_proxy_cid
     fi
