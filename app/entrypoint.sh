@@ -24,7 +24,7 @@ EOT
 }
 
 function get_nginx_proxy_gen_cid {
-    local pattern=$NGINX_GEN_CONTAINER_NAME_PATTERN
+    local pattern=${NGINX_GEN_CONTAINER_NAME_PATTERN:-}
     if [[ -z "$pattern" ]]; then
         pattern="nginx-gen"
     fi
@@ -79,7 +79,7 @@ source /app/functions.lib
 
 if [[ "$*" == "/bin/bash /app/start.sh" ]]; then
     check_docker_socket
-    if [[ -z "${NGINX_DOCKER_GEN_CONTAINER}" ]]; then
+    if [[ -z "${NGINX_DOCKER_GEN_CONTAINER:-}" ]]; then
         get_nginx_proxy_gen_cid
     fi
     if [[ -z "${NGINX_DOCKER_GEN_CONTAINER:-}" ]]; then
